@@ -19,7 +19,7 @@ def insert_into_and(effect_body, new_effect):
 
 
 # =========================
-# EXTRACT ACTION BLOCK (SAFE)
+# EXTRACT ACTION BLOCK 
 # =========================
 
 def extract_action_block(domain_str, action_name):
@@ -41,7 +41,7 @@ def extract_action_block(domain_str, action_name):
 
 
 # =========================
-# EXTRACT EFFECT (SAFE)
+# EXTRACT EFFECT
 # =========================
 
 def extract_effect_block(action_block):
@@ -65,7 +65,7 @@ def extract_effect_block(action_block):
 
 
 # =========================
-# ADD PREDICATES (CLEAN)
+# PREDICATES
 # =========================
 
 def add_observation_predicates(domain_str, observations):
@@ -78,26 +78,30 @@ def add_observation_predicates(domain_str, observations):
         raise ValueError("No :predicates found")
 
     old = match.group(1)
+
+    
     new = old.strip() + "\n    " + new_preds + "\n"
 
-    return domain_str.replace(old, new)
+    return domain_str.replace(old, new, 1)
 
 
 # =========================
-# MODIFY ACTIONS (CORRECT)
+# MODIFY ACTIONS
 # =========================
 
 def modify_actions(domain_str, observations):
     new_domain = domain_str
 
     for i, action in enumerate(observations):
+        action = action.lower()
+
         action_block = extract_action_block(new_domain, action)
 
         if not action_block:
             print(f"Warning: action '{action}' not found")
             continue
 
-        # Split at :effect safely
+        
         if ":effect" not in action_block:
             raise ValueError(f"No :effect in {action}")
 
@@ -108,18 +112,22 @@ def modify_actions(domain_str, observations):
         if not effect_block:
             raise ValueError(f"Effect parsing failed for {action}")
 
-        # Build observation logic
+        
         if i == 0:
             obs = f"(p_{action})"
         else:
             prev = observations[i - 1]
             obs = f"(when (p_{prev}) (p_{action}))"
 
-        clean_effect = effect_block.replace(":effect", "").strip()
-        new_effect = ":effect " + insert_into_and(clean_effect, obs)
+        
+        clean_effect = effect_block.replace(":effect", "", 1).strip()
 
-        new_action = before + new_effect
+        updated_effect = ":effect " + insert_into_and(clean_effect, obs)
 
+        
+        new_action = before + updated_effect + "\n)"
+
+        
         new_domain = new_domain.replace(action_block, new_action, 1)
 
     return new_domain
@@ -145,7 +153,7 @@ def modify_goal(problem_str, last_obs, compliant=True):
     else:
         new_goal = f"(and {original} (not {obs}))"
 
-    return problem_str.replace(original, new_goal)
+    return problem_str.replace(original, new_goal, 1)
 
 
 # =========================
