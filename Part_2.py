@@ -1,6 +1,7 @@
 import subprocess
 import re
 import os
+import json
 
 # =========================================
 # FAST DOWNWARD PATH
@@ -156,17 +157,57 @@ def interpret(compliant, noncompliant):
 # =========================================
 # MAIN
 # =========================================
+# =========================================
+# MAIN
+# =========================================
 if __name__ == "__main__":
 
     if not check_files(DOMAIN, COMPLIANT, NONCOMPLIANT):
         exit(1)
 
-    compliant_output    = run_planner(DOMAIN, COMPLIANT)
-    compliant_results   = extract_results(compliant_output)
+    # =========================
+    # COMPLIANT
+    # =========================
+    compliant_output = run_planner(DOMAIN, COMPLIANT)
+    compliant_results = extract_results(compliant_output)
+
+    compliant_plan = extract_plan()
+
+    if os.path.exists("sas_plan"):
+        os.rename("sas_plan", "sas_plan_compliant")
+
     show_results("COMPLIANT PROBLEM", compliant_results)
 
-    noncompliant_output   = run_planner(DOMAIN, NONCOMPLIANT)
-    noncompliant_results  = extract_results(noncompliant_output)
+    # =========================
+    # NONCOMPLIANT
+    # =========================
+    noncompliant_output = run_planner(DOMAIN, NONCOMPLIANT)
+    noncompliant_results = extract_results(noncompliant_output)
+
+    noncompliant_plan = extract_plan()
+
+    if os.path.exists("sas_plan"):
+        os.rename("sas_plan", "sas_plan_noncompliant")
+
     show_results("NON-COMPLIANT PROBLEM", noncompliant_results)
+
+    # =========================
+    # SAVE JSON
+    # =========================
+    final_results = {
+        "compliant": {
+            "results": compliant_results,
+            "plan": compliant_plan
+        },
+        "noncompliant": {
+            "results": noncompliant_results,
+            "plan": noncompliant_plan
+        }
+    }
+
+    with open("results.json", "w") as f:
+        json.dump(final_results, f, indent=4)
+
+    print("\nResults saved to results.json")
 
     interpret(compliant_results, noncompliant_results)
