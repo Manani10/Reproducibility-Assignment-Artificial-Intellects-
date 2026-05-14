@@ -64,6 +64,39 @@ def extract_results(output):
 
     return results
 
+
+def extract_plan(plan_file="sas_plan"):
+
+    actions = []
+
+    try:
+        with open(plan_file, "r") as f:
+
+            for line in f:
+
+                line = line.strip()
+
+                
+                if line.startswith(";"):
+                    continue
+
+                if line.startswith("("):
+
+                    action = line.strip("()")
+
+                    actions.append(action)
+
+    except FileNotFoundError:
+        print(f"[WARNING] Plan file not found: {plan_file}")
+
+    return actions
+
+def sample_observations(plan, obs_pct):
+
+    k = max(1, int(len(plan) * obs_pct / 100))
+
+    return plan[:k]
+
 # =========================================
 # DISPLAY RESULTS
 # =========================================
