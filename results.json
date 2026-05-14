@@ -1,0 +1,20 @@
+{
+    "compliant": {
+        "results": {
+            "success": false,
+            "plan_cost": null,
+            "search_time": null,
+            "expanded_states": null
+        },
+        "plan": []
+    },
+    "noncompliant": {
+        "results": {
+            "success": false,
+            "plan_cost": null,
+            "search_time": null,
+            "expanded_states": null
+        },
+        "plan": []
+    }
+}
