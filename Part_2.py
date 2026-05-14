@@ -6,8 +6,8 @@ import os
 # FAST DOWNWARD PATH
 # =========================================
 FAST_DOWNWARD = "fast-downward.py"
-DOMAIN = "domain_mod.pddl"
-COMPLIANT = "problem_compliant.pddl"
+DOMAIN = "domain.pddl"
+COMPLIANT = "problem.pddl"
 NONCOMPLIANT = "problem_noncompliant.pddl"
 
 # =========================================
