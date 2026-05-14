@@ -35,12 +35,18 @@ def run_planner(domain_file, problem_file):
     if result.returncode not in (0, 10, 11, 12):
         print(f"[WARNING] Planner exited with code {result.returncode}")
 
-    return result.stdout + result.stderr
+    full_output = result.stdout + result.stderr
+
+print("\n===== PLANNER OUTPUT =====")
+print(full_output)
+
+return full_output
 
 # =========================================
 # EXTRACT RESULTS
 # =========================================
 def extract_results(output):
+
     results = {
         "success": False,
         "plan_cost": None,
@@ -48,23 +54,57 @@ def extract_results(output):
         "expanded_states": None
     }
 
-    if "Solution found" in output:
+    # =====================================
+    # SUCCESS
+    # =====================================
+    if (
+        "Solution found" in output or
+        "Plan cost:" in output
+    ):
         results["success"] = True
 
-    cost_match = re.search(r"Plan cost:\s*(\d+)", output)
-    if cost_match:
-        results["plan_cost"] = int(cost_match.group(1))
+    # =====================================
+    # PLAN COST
+    # Matches:
+    # Plan cost: 7
+    # Plan cost: 7 (unit cost)
+    # =====================================
+    cost_match = re.search(
+        r"Plan cost:\s*([\d.]+)",
+        output
+    )
 
-    time_match = re.search(r"Search time:\s*([\d.]+)s?", output)
+    if cost_match:
+        results["plan_cost"] = float(cost_match.group(1))
+
+    # =====================================
+    # SEARCH TIME
+    # Matches:
+    # Search time: 0.01s
+    # =====================================
+    time_match = re.search(
+        r"Search time:\s*([\d.]+)",
+        output
+    )
+
     if time_match:
         results["search_time"] = float(time_match.group(1))
 
-    expanded_match = re.search(r"Expanded (\d+) state", output)
+    # =====================================
+    # EXPANDED STATES
+    # Matches:
+    # Expanded 15 state(s).
+    # Expanded 15 states.
+    # =====================================
+    expanded_match = re.search(
+        r"Expanded\s+(\d+)",
+        output
+    )
+
     if expanded_match:
         results["expanded_states"] = int(expanded_match.group(1))
 
     return results
-
 
 def extract_plan(plan_file="sas_plan"):
 
